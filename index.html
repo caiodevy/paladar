@@ -249,6 +249,7 @@
         // Toca um som de forma defensiva: navegadores podem bloquear áudio (política
         // de autoplay) ou a URL pode falhar em algum momento — nesses casos o som
         // simplesmente não toca, mas o pedido continua funcionando normalmente.
+        backgroundMusic.play().catch(() => {});
         const playSound = (audio) => {
             try {
                 audio.currentTime = 0;
