@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0907">
+    <meta name="description" content="Pizzaria Bom Paladar — peça sua pizza com entrega rápida em Matriz de Camaragibe, direto pelo WhatsApp.">
+    <title>Pizzaria Bom Paladar</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* ============ DESIGN TOKENS ============ */
+        :root {
+            --bg: #0b0907;
+            --text: #ffffff;
+            --muted: rgba(255,255,255,.62);
+            --glass: rgba(255,255,255,.05);
+            --glass-hi: rgba(255,255,255,.10);
+            --glass-b: rgba(255,255,255,.12);
+            --sheet: rgba(22,18,15,.92);
+            --accent: #ff9a1f;
+            --accent-2: #ff6a00;
+            --ph: #1a1612;
+            --shadow: 0 14px 40px -14px rgba(0,0,0,.65);
+            color-scheme: dark;
+        }
+        html.light {
+            --bg: #f7f2eb;
+            --text: #1b1410;
+            --muted: rgba(27,20,16,.62);
+            --glass: rgba(255,255,255,.70);
+            --glass-hi: rgba(255,255,255,.92);
+            --glass-b: rgba(27,20,16,.09);
+            --sheet: rgba(255,252,248,.96);
+            --ph: #ece4da;
+            --shadow: 0 14px 40px -16px rgba(120,70,20,.30);
+            color-scheme: light;
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            transition: background-color .3s ease, color .3s ease;
+        }
+        section[id], div[id] { scroll-margin-top: 88px; }
+        ::placeholder { color: var(--muted); opacity: 1; }
+        ::selection { background: var(--accent-2); color: #fff; }
+
+        /* ============ BACKGROUND GLOW ============ */
+        .bg-glow { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+        .bg-glow::before, .bg-glow::after {
+            content: ''; position: absolute; border-radius: 9999px; filter: blur(110px);
+        }
+        .bg-glow::before { width: 520px; height: 520px; top: -160px; left: -140px; background: rgba(255,122,0,.22); }
+        .bg-glow::after  { width: 460px; height: 460px; bottom: -140px; right: -120px; background: rgba(229,9,20,.14); }
+        html.light .bg-glow::before { background: rgba(255,154,31,.28); }
+        html.light .bg-glow::after  { background: rgba(255,90,60,.16); }
+
+        /* ============ GLASS PRIMITIVES ============ */
+        .glass {
+            background: linear-gradient(145deg, var(--glass-hi), var(--glass));
+            border: 1px solid var(--glass-b);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            backdrop-filter: blur(18px) saturate(140%);
+            box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.07);
+        }
+        .glass-strong {
+            background: var(--sheet);
+            border: 1px solid var(--glass-b);
+            -webkit-backdrop-filter: blur(26px) saturate(150%);
+            backdrop-filter: blur(26px) saturate(150%);
+            box-shadow: 0 -10px 60px -10px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07);
+        }
+        .text-muted { color: var(--muted); }
+        .text-accent { color: var(--accent); }
+        .text-accent-grad {
+            background: linear-gradient(90deg, #ffb13b, #ff7a00);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .btn-accent {
+            background: linear-gradient(90deg, #ffa62b, #ff7a00);
+            color: #fff;
+            box-shadow: 0 10px 26px -8px rgba(255,122,0,.65), inset 0 1px 0 rgba(255,255,255,.35);
+        }
+        .btn-accent:hover { filter: brightness(1.06); }
+        .btn-wa {
+            background: linear-gradient(90deg, #25d366, #16a34a);
+            color: #fff;
+            box-shadow: 0 10px 26px -8px rgba(34,197,94,.6), inset 0 1px 0 rgba(255,255,255,.3);
+        }
+        .icon-btn {
+            background: var(--glass); border: 1px solid var(--glass-b); color: var(--text);
+            transition: background .2s ease, border-color .2s ease;
+        }
+        .icon-btn:hover { border-color: var(--accent); }
+        .img-ph { background: var(--ph); }
+
+        /* ============ INTERACTIONS ============ */
+        button, a { -webkit-tap-highlight-color: transparent; }
+        button { transition: transform .15s cubic-bezier(.34,1.56,.64,1), filter .15s ease, background .2s ease, border-color .2s ease, color .2s ease; }
+        button:active { transform: scale(.94); }
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .card-lift { transition: transform .3s ease, border-color .3s ease; }
+        .card-lift:hover { transform: translateY(-4px); border-color: rgba(255,154,31,.55); }
+        .card-lift:hover .zoom { transform: scale(1.08); }
+        .zoom { transition: transform .6s ease; }
+
+        .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* ============ CATEGORY TILES ============ */
+        .cat-tile {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+            width: 70px; height: 82px; flex-shrink: 0; border-radius: 22px;
+            background: var(--glass); border: 1px solid var(--glass-b);
+            font-size: 11px; font-weight: 700; color: var(--muted);
+            scroll-snap-align: start;
+        }
+        .cat-tile .emo { font-size: 26px; line-height: 1; }
+        .cat-tile.active {
+            color: var(--text);
+            background: linear-gradient(160deg, rgba(255,154,31,.32), rgba(255,122,0,.10));
+            border-color: var(--accent);
+            box-shadow: 0 8px 26px -10px rgba(255,122,0,.7);
+        }
+
+        /* ============ SWITCH ============ */
+        .switch { width: 50px; height: 28px; border-radius: 9999px; background: var(--glass-b); position: relative; flex-shrink: 0; }
+        .switch span { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 9999px; background: #fff; transition: transform .25s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 2px 6px rgba(0,0,0,.3); }
+        .switch.on { background: linear-gradient(90deg, #ffa62b, #ff7a00); }
+        .switch.on span { transform: translateX(22px); }
+
+        /* ============ ANIMATIONS ============ */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
+        @keyframes popIn { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: none; } }
+        @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+        @keyframes cartWiggle { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-8deg); } 40% { transform: rotate(8deg); } 60% { transform: rotate(-5deg); } 80% { transform: rotate(3deg); } }
+        @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .fade-anim { animation: fadeIn .25s ease-out; }
+        .sheet-anim { animation: sheetUp .34s cubic-bezier(.2,.8,.2,1); }
+        .drawer-anim { animation: sheetUp .34s cubic-bezier(.2,.8,.2,1); }
+        .pop-anim { animation: popIn .22s ease-out; }
+        .toast-anim { animation: toastIn .3s ease-out; }
+        .cart-wiggle { animation: cartWiggle .5s ease-in-out; }
+        .floaty { animation: floaty 5s ease-in-out infinite; }
+        @media (min-width: 768px) {
+            .sheet-anim { animation: popIn .28s ease-out; }
+            .drawer-anim { animation: slideIn .32s cubic-bezier(.2,.8,.2,1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow" aria-hidden="true"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useMemo, memo, useRef } = React;
+
+        /* ============================================================
+           DADOS — fonte única da verdade para nomes e preços.
+           O carrinho guarda só { id, quantidade, opções }; o preço é
+           SEMPRE buscado no CATALOG na hora de exibir ou enviar.
+           ============================================================ */
+        const formatPrice = (value) => value.toFixed(2).replace('.', ',');
+        const norm = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+        const pizzas = Object.freeze([
+            { id: 1,  category: 'frango',    name: 'Frango com Catupiry',  ingredients: 'Molho, frango, catupiry, tomate, orégano, cebola e ervilha verde.', price: 35.00, image: 'https://images.unsplash.com/photo-1773620497483-aafa93392160?q=80&w=400&auto=format&fit=crop' },
+            { id: 2,  category: 'calabresa', name: 'Calabresa',            ingredients: 'Molho, mussarela, calabresa, cebola e orégano.', price: 35.00, image: 'https://images.unsplash.com/photo-1618213837799-25d5552820d3?q=80&w=400&auto=format&fit=crop' },
+            { id: 3,  category: 'frango',    name: 'Frango com Bacon',     ingredients: 'Molho, frango, bacon, tomate, cebola, ervilha, milho verde e orégano.', price: 35.00, image: 'https://images.unsplash.com/photo-1767065603441-61923212f80c?q=80&w=400&auto=format&fit=crop' },
+            { id: 4,  category: 'calabresa', name: 'Calabresa com Bacon',  ingredients: 'Molho, mussarela, calabresa, bacon, cebola e orégano.', price: 35.00, image: 'https://images.unsplash.com/photo-1767065603116-8cee3bf11372?q=80&w=400&auto=format&fit=crop' },
+            { id: 5,  category: 'especiais', name: 'Bacon',                ingredients: 'Molho, mussarela, bacon, tomate, cebola e orégano.', price: 35.00, image: 'https://images.unsplash.com/photo-1592977731761-2d58aafef572?q=80&w=400&auto=format&fit=crop' },
+            { id: 6,  category: 'calabresa', name: 'Baiana',               ingredients: 'Molho, mussarela, calabresa, pimenta calabresa, ovo, tomate, cebola e orégano.', price: 35.00, image: 'https://images.unsplash.com/photo-1767065603803-a41d2e25a34c?q=80&w=400&auto=format&fit=crop' },
+            { id: 7,  category: 'queijos',   name: '4 Queijos',            ingredients: 'Molho, parmesão, mussarela, catupiry, cheddar, tomate e orégano.', price: 35.00, image: 'https://images.unsplash.com/photo-1670148815909-e79a18e16ddd?q=80&w=400&auto=format&fit=crop' },
+            { id: 8,  category: 'especiais', name: 'Portuguesa',           ingredients: 'Molho, mussarela, ovo, presunto, ervilha, milho verde, tomate, cebola e orégano.', price: 35.00, image: 'https://images.unsplash.com/photo-1705538150113-25b08da3ae07?q=80&w=400&auto=format&fit=crop' },
+            { id: 9,  category: 'queijos',   name: 'Mista',                ingredients: 'Molho, mussarela, presunto, ervilha, milho verde, tomate, cebola e orégano.', price: 35.00, image: 'https://images.unsplash.com/photo-1604917869287-3ae73c77e227?q=80&w=400&auto=format&fit=crop' },
+            { id: 10, category: 'queijos',   name: 'Mussarela',            ingredients: 'Molho, mussarela, tomate, ervilha, milho verde e orégano.', price: 35.00, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=400&auto=format&fit=crop' },
+            { id: 11, category: 'frango',    name: 'Sabor da Casa',        ingredients: 'Molho, frango, mussarela, catupiry, cebola e orégano.', price: 35.00, image: 'https://images.unsplash.com/photo-1671106681075-5a7233268cbd?q=80&w=400&auto=format&fit=crop' },
+            { id: 12, category: 'especiais', name: 'Carne Seca',           ingredients: 'Molho, carne seca (charque), mussarela, cebola, ervilha, milho verde e catupiry.', price: 38.00, image: 'https://images.unsplash.com/photo-1767065603341-1c477b3e6625?q=80&w=400&auto=format&fit=crop' },
+        ].map(Object.freeze));
+
+        const bebidas = Object.freeze([
+            { id: 13, category: 'bebida', name: 'Guaraná 1L', ingredients: 'Refrigerante Guaraná, garrafa de 1 litro.', price: 7.00,  image: 'https://cdn.pixabay.com/photo/2021/04/23/06/35/soda-6200841_640.jpg' },
+            { id: 14, category: 'bebida', name: 'Guaraná 2L', ingredients: 'Refrigerante Guaraná, garrafa de 2 litros.', price: 10.00, image: 'https://cdn.pixabay.com/photo/2021/04/23/06/35/soda-6200841_640.jpg' },
+            { id: 15, category: 'bebida', name: 'Pepsi 1L',   ingredients: 'Refrigerante Pepsi, garrafa de 1 litro.', price: 7.00,  image: 'https://cdn.pixabay.com/photo/2020/05/10/05/14/pepsi-5152332_640.jpg' },
+            { id: 16, category: 'bebida', name: 'Pepsi 2L',   ingredients: 'Refrigerante Pepsi, garrafa de 2 litros.', price: 10.00, image: 'https://cdn.pixabay.com/photo/2020/05/10/05/14/pepsi-5152332_640.jpg' },
+        ].map(Object.freeze));
+
+        const CATALOG = Object.freeze(
+            [...pizzas, ...bebidas].reduce((map, item) => { map[item.id] = item; return map; }, {})
+        );
+
+        const CATEGORIES = Object.freeze([
+            { id: 'todas',     label: 'Todas',     emoji: '🍕' },
+            { id: 'frango',    label: 'Frango',    emoji: '🍗' },
+            { id: 'calabresa', label: 'Calabresa', emoji: '🌭' },
+            { id: 'queijos',   label: 'Queijos',   emoji: '🧀' },
+            { id: 'especiais', label: 'Especiais', emoji: '⭐' },
+        ]);
+        const CATEGORY_LABEL = Object.freeze({ frango: 'Frango', calabresa: 'Calabresa', queijos: 'Queijos', especiais: 'Especiais', bebida: 'Bebida' });
+
+        const HIGHLIGHT_IDS = Object.freeze([11, 1, 2, 12, 7, 8]);
+
+        // Personalizações GRATUITAS (retirar ingrediente). Não alteram preço.
+        const REMOVALS = Object.freeze([
+            { id: 'sem-cebola',  label: 'Sem cebola',  keyword: 'cebola' },
+            { id: 'sem-tomate',  label: 'Sem tomate',  keyword: 'tomate' },
+            { id: 'sem-ervilha', label: 'Sem ervilha', keyword: 'ervilha' },
+            { id: 'sem-milho',   label: 'Sem milho',   keyword: 'milho' },
+            { id: 'sem-oregano', label: 'Sem orégano', keyword: 'orégano' },
+        ]);
+        const ALLOWED_OPTS = Object.freeze(REMOVALS.reduce((m, r) => { m[r.id] = r.label; return m; }, {}));
+
+        const MAX_QTY_PER_ITEM = 20;
+        const MAX_NOTE_LEN = 120;
+        const WHATSAPP_NUMBER = '5582994033796';
+        const INSTAGRAM_LINK = 'https://www.instagram.com/pizzaria.bom.paladar.j.m?igsh=N2lubGphbngybG9h';
+
+        /* ============ SONS (opcionais, nunca travam o app) ============ */
+        const SOUND_ADD_TO_CART = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+        const SOUND_ORDER_SENT = new Audio('https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3');
+        [SOUND_ADD_TO_CART, SOUND_ORDER_SENT].forEach((a) => { a.preload = 'auto'; a.volume = 0.45; });
+        const playSound = (audio) => {
+            try { audio.currentTime = 0; audio.play().catch(() => {}); } catch (e) { /* ignorado */ }
+        };
+
+        const safeStorageGet = (key, fallback) => {
+            try { const v = localStorage.getItem(key); return v === null ? fallback : v; } catch (e) { return fallback; }
+        };
+        const safeStorageSet = (key, value) => { try { localStorage.setItem(key, value); } catch (e) { /* ignorado */ } };
+
+        const getGreeting = () => {
+            const h = new Date().getHours();
+            if (h < 12) return 'Bom dia';
+            if (h < 18) return 'Boa tarde';
+            return 'Boa noite';
+        };
+
+        /* ============ ÍCONES ============ */
+        const ICONS = {
+            search: 'M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z',
+            sliders: 'M4 6h9m4 0h3M4 12h3m4 0h9M4 18h11m4 0h1M15 4v4M9 10v4M17 16v4',
+            cart: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z',
+            trash: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
+            x: 'M6 18L18 6M6 6l12 12',
+            plus: 'M12 5v14M5 12h14',
+            minus: 'M5 12h14',
+            heart: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+            home: 'M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10',
+            menu: 'M4 6h16M4 12h16M4 18h10',
+            sun: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
+            moon: 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z',
+            back: 'M15 19l-7-7 7-7',
+            up: 'M5 15l7-7 7 7',
+            check: 'M5 13l4 4L19 7',
+            arrow: 'M14 5l7 7m0 0l-7 7m7-7H3',
+            pin: 'M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z',
+            bolt: 'M13 10V3L4 14h7v7l9-11h-7z',
+        };
+        const Icon = memo(function Icon({ name, className = 'h-5 w-5', sw = 2, fill = 'none' }) {
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" className={className} fill={fill} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d={ICONS[name]} />
+                </svg>
+            );
+        });
+        const WhatsAppGlyph = ({ size = 18 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.47 3.55 1.36 5.11L2.05 22l5.15-1.35a9.9 9.9 0 004.84 1.23h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2m0 18.15h-.01a8.24 8.24 0 01-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.22 8.22 0 01-1.26-4.38c0-4.54 3.7-8.24 8.26-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 012.41 5.83c0 4.54-3.7 8.23-8.24 8.23m4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.17.24-.64.81-.78.97-.15.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.24-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.24-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.36-.77-1.86-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.47-.01-.17 0-.43.06-.66.31-.23.24-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.25 3.74.59.26 1.05.41 1.42.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.23-.17-.48-.29" /></svg>
+        );
+
+        /* ============ COMPONENTES BASE ============ */
+        function SafeImg({ src, alt, className, emoji = '🍕' }) {
+            const [failed, setFailed] = useState(false);
+            if (failed) {
+                return <div role="img" aria-label={alt} className={`${className} flex items-center justify-center text-5xl`}>{emoji}</div>;
+            }
+            return <img src={src} alt={alt} loading="lazy" decoding="async" className={className} onError={() => setFailed(true)} />;
+        }
+
+        function Switch({ checked, onChange, label }) {
+            return (
+                <button type="button" role="switch" aria-checked={checked} aria-label={label} onClick={onChange} className={`switch ${checked ? 'on' : ''}`}>
+                    <span />
+                </button>
+            );
+        }
+
+        function Stepper({ value, onMinus, onPlus, min = 1 }) {
+            return (
+                <div className="flex items-center gap-1 rounded-full icon-btn p-1">
+                    <button type="button" onClick={onMinus} disabled={value <= min} aria-label="Diminuir quantidade" className="h-9 w-9 rounded-full flex items-center justify-center disabled:opacity-40" style={{ background: 'var(--glass-b)' }}>
+                        <Icon name="minus" className="h-4 w-4" sw={3} />
+                    </button>
+                    <span className="w-8 text-center font-black tabular-nums" aria-live="polite">{value}</span>
+                    <button type="button" onClick={onPlus} disabled={value >= MAX_QTY_PER_ITEM} aria-label="Aumentar quantidade" className="h-9 w-9 rounded-full flex items-center justify-center disabled:opacity-40" style={{ background: 'var(--glass-b)' }}>
+                        <Icon name="plus" className="h-4 w-4" sw={3} />
+                    </button>
+                </div>
+            );
+        }
+
+        /* Card de pizza (grade e carrossel) */
+        const ItemCard = memo(function ItemCard({ item, isFav, isJustAdded, onOpen, onAdd, onFav, compact }) {
+            return (
+                <article onClick={() => onOpen(item.id)} className={`glass card-lift rounded-[1.7rem] p-3 flex flex-col cursor-pointer ${compact ? 'w-44 sm:w-52 shrink-0 snap-start' : ''}`}>
+                    <div className="relative rounded-[1.2rem] overflow-hidden aspect-square img-ph">
+                        <button type="button" aria-label={`Ver detalhes de ${item.name}`} className="block w-full h-full">
+                            <SafeImg src={item.image} alt={item.name} className="zoom w-full h-full object-cover" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); onFav(item.id); }}
+                            aria-label={isFav ? `Remover ${item.name} dos favoritos` : `Favoritar ${item.name}`}
+                            aria-pressed={isFav}
+                            className="absolute top-2 right-2 h-9 w-9 rounded-full flex items-center justify-center"
+                            style={{ background: 'rgba(0,0,0,.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', color: isFav ? '#ff3b4a' : '#fff' }}
+                        >
+                            <Icon name="heart" className="h-[18px] w-[18px]" fill={isFav ? 'currentColor' : 'none'} />
+                        </button>
+                    </div>
+                    <h3 className="mt-3 font-extrabold text-[15px] leading-tight line-clamp-2 min-h-[2.4em]">{item.name}</h3>
+                    {!compact && <p className="text-muted text-xs mt-1.5 leading-relaxed line-clamp-3 flex-grow">{item.ingredients}</p>}
+                    <div className="mt-auto pt-3 flex items-center justify-between">
+                        <span className="font-black text-lg leading-none"><small className="text-accent text-xs font-extrabold mr-0.5">R$</small>{formatPrice(item.price)}</span>
+                        <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); onAdd(item.id); }}
+                            aria-label={`Adicionar ${item.name} ao carrinho`}
+                            className={`h-10 w-10 rounded-xl flex items-center justify-center ${isJustAdded ? 'bg-green-600 text-white' : 'btn-accent'}`}
+                        >
+                            <Icon name={isJustAdded ? 'check' : 'plus'} className="h-5 w-5" sw={3} />
+                        </button>
+                    </div>
+                </article>
+            );
+        });
+
+        const DrinkCard = memo(function DrinkCard({ item, isJustAdded, onAdd }) {
+            return (
+                <div className="glass card-lift rounded-3xl p-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div className="img-ph overflow-hidden rounded-2xl w-16 h-16 flex-shrink-0">
+                            <SafeImg src={item.image} alt={item.name} emoji="🥤" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="min-w-0">
+                            <h3 className="font-extrabold text-sm truncate">{item.name}</h3>
+                            <span className="font-black text-lg"><small className="text-accent text-xs font-extrabold mr-0.5">R$</small>{formatPrice(item.price)}</span>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => onAdd(item.id)}
+                        aria-label={`Adicionar ${item.name} ao carrinho`}
+                        className={`h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0 ${isJustAdded ? 'bg-green-600 text-white' : 'btn-accent'}`}
+                    >
+                        <Icon name={isJustAdded ? 'check' : 'plus'} className="h-5 w-5" sw={3} />
+                    </button>
+                </div>
+            );
+        });
+
+        /* ============ FOLHA DE DETALHES (estilo "Customize") ============ */
+        function DetailSheet({ item, isFav, onFav, onAdd, onClose }) {
+            const [qty, setQty] = useState(1);
+            const [opts, setOpts] = useState([]);
+            const [note, setNote] = useState('');
+            const isPizza = item.category !== 'bebida';
+
+            const available = useMemo(
+                () => REMOVALS.filter((r) => norm(item.ingredients).includes(norm(r.keyword))),
+                [item]
+            );
+            const toggleOpt = (id) => setOpts((prev) => (prev.includes(id) ? prev.filter((o) => o !== id) : [...prev, id]));
+            const bigImage = item.image.replace('w=400', 'w=800');
+
+            return (
+                <div className="fixed inset-0 z-[80] flex items-end md:items-center justify-center fade-anim" role="dialog" aria-modal="true" aria-label={item.name}>
+                    <div className="absolute inset-0 bg-black/65" style={{ backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} onClick={onClose} />
+                    <div className="sheet-anim relative w-full md:max-w-lg max-h-[94dvh] md:max-h-[90dvh] glass-strong rounded-t-[2rem] md:rounded-[2rem] flex flex-col overflow-hidden">
+                        <div className="flex-1 overflow-y-auto no-scrollbar">
+                            {/* Imagem de capa */}
+                            <div className="relative h-64 md:h-72 img-ph">
+                                <SafeImg src={bigImage} alt={item.name} emoji={isPizza ? '🍕' : '🥤'} className="w-full h-full object-cover" />
+                                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, var(--sheet) 2%, transparent 55%)' }} />
+                                <button type="button" onClick={onClose} aria-label="Voltar" className="absolute top-4 left-4 h-11 w-11 rounded-full flex items-center justify-center text-white" style={{ background: 'rgba(0,0,0,.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                                    <Icon name="back" className="h-5 w-5" sw={2.5} />
+                                </button>
+                                {isPizza && (
+                                    <button type="button" onClick={() => onFav(item.id)} aria-pressed={isFav} aria-label={isFav ? 'Remover dos favoritos' : 'Favoritar'} className="absolute top-4 right-4 h-11 w-11 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,0,0,.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', color: isFav ? '#ff3b4a' : '#fff' }}>
+                                        <Icon name="heart" className="h-5 w-5" fill={isFav ? 'currentColor' : 'none'} />
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="px-6 pb-6 -mt-6 relative">
+                                <span className="inline-block text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full" style={{ background: 'rgba(229,9,20,.85)', color: '#fff' }}>
+                                    {CATEGORY_LABEL[item.category]}
+                                </span>
+                                <div className="flex items-start justify-between gap-4 mt-3">
+                                    <h2 className="text-2xl font-black leading-tight">{item.name}</h2>
+                                    <span className="text-2xl font-black text-accent whitespace-nowrap"><small className="text-sm mr-0.5">R$</small>{formatPrice(item.price)}</span>
+                                </div>
+                                <p className="text-muted text-sm leading-relaxed mt-2">{item.ingredients}</p>
+
+                                {isPizza && (
+                                    <>
+                                        <div className="my-5 h-px" style={{ background: 'var(--glass-b)' }} />
+                                        <h3 className="font-extrabold mb-1">Personalizar</h3>
+                                        <p className="text-muted text-xs mb-3">Retire o que não gosta — sem custo adicional.</p>
+                                        <div className="space-y-1">
+                                            {available.map((r) => (
+                                                <div key={r.id} className="flex items-center justify-between py-2.5">
+                                                    <span className="text-sm font-semibold">{r.label}</span>
+                                                    <Switch checked={opts.includes(r.id)} onChange={() => toggleOpt(r.id)} label={r.label} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="my-5 h-px" style={{ background: 'var(--glass-b)' }} />
+                                <label htmlFor="obs" className="font-extrabold block mb-2">Observações</label>
+                                <textarea
+                                    id="obs"
+                                    value={note}
+                                    onChange={(e) => setNote(e.target.value.slice(0, MAX_NOTE_LEN))}
+                                    rows={2}
+                                    placeholder="Ex.: tirar a azeitona, cortar em 8 pedaços…"
+                                    className="w-full rounded-2xl glass px-4 py-3 text-sm outline-none resize-none"
+                                    style={{ color: 'var(--text)' }}
+                                />
+                                <p className="text-right text-[11px] text-muted mt-1">{note.length}/{MAX_NOTE_LEN}</p>
+                            </div>
+                        </div>
+
+                        {/* Barra fixa: quantidade + adicionar */}
+                        <div className="p-4 flex items-center gap-3" style={{ borderTop: '1px solid var(--glass-b)', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+                            <Stepper value={qty} onMinus={() => setQty((q) => Math.max(1, q - 1))} onPlus={() => setQty((q) => Math.min(MAX_QTY_PER_ITEM, q + 1))} />
+                            <button
+                                type="button"
+                                onClick={() => { onAdd(item.id, qty, opts, note); onClose(); }}
+                                className="btn-accent flex-1 h-[52px] rounded-full font-extrabold text-sm flex items-center justify-between px-6"
+                            >
+                                <span>Adicionar ao Carrinho</span>
+                                <span className="pl-4 font-black" style={{ borderLeft: '1px solid rgba(255,255,255,.4)' }}>R$ {formatPrice(item.price * qty)}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        /* ============ APP ============ */
+        function App() {
+            const [isLight, setIsLight] = useState(() => safeStorageGet('bp_theme', 'dark') === 'light');
+            const [showScrollTop, setShowScrollTop] = useState(false);
+            const [cart, setCart] = useState([]);
+            const [isCartOpen, setIsCartOpen] = useState(false);
+            const [selectedId, setSelectedId] = useState(null);
+            const [justAdded, setJustAdded] = useState(null);
+            const [toast, setToast] = useState(null);
+            const [query, setQuery] = useState('');
+            const [category, setCategory] = useState('todas');
+            const [showFilter, setShowFilter] = useState(false);
+            const [sortAZ, setSortAZ] = useState(false);
+            const [favOnly, setFavOnly] = useState(false);
+            const [activeSection, setActiveSection] = useState('inicio');
+            const [favs, setFavs] = useState(() => {
+                try {
+                    const arr = JSON.parse(safeStorageGet('bp_favs', '[]'));
+                    return Array.isArray(arr) ? arr.filter((id) => CATALOG[id] && CATALOG[id].category !== 'bebida') : [];
+                } catch (e) { return []; }
+            });
+            const toastTimer = useRef(null);
+            const addedTimer = useRef(null);
+            const greeting = useMemo(getGreeting, []);
+
+            /* Tema */
+            useEffect(() => {
+                document.documentElement.classList.toggle('light', isLight);
+                const meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute('content', isLight ? '#f7f2eb' : '#0b0907');
+                safeStorageSet('bp_theme', isLight ? 'light' : 'dark');
+            }, [isLight]);
+
+            /* Favoritos persistidos */
+            useEffect(() => { safeStorageSet('bp_favs', JSON.stringify(favs)); }, [favs]);
+
+            /* Scroll: botão "topo" */
+            useEffect(() => {
+                const onScroll = () => setShowScrollTop(window.scrollY > window.innerHeight / 2);
+                window.addEventListener('scroll', onScroll, { passive: true });
+                return () => window.removeEventListener('scroll', onScroll);
+            }, []);
+
+            /* Seção ativa (para o menu inferior) */
+            useEffect(() => {
+                const els = ['inicio', 'cardapio', 'bebidas'].map((id) => document.getElementById(id)).filter(Boolean);
+                if (!('IntersectionObserver' in window)) return;
+                const io = new IntersectionObserver((entries) => {
+                    entries.forEach((e) => { if (e.isIntersecting) setActiveSection(e.target.id); });
+                }, { rootMargin: '-40% 0px -50% 0px' });
+                els.forEach((el) => io.observe(el));
+                return () => io.disconnect();
+            });
+
+            /* Trava a rolagem do fundo e fecha com Esc */
+            useEffect(() => {
+                document.body.style.overflow = (isCartOpen || selectedId) ? 'hidden' : '';
+                const onKey = (e) => {
+                    if (e.key === 'Escape') { setIsCartOpen(false); setSelectedId(null); setShowFilter(false); }
+                };
+                window.addEventListener('keydown', onKey);
+                return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+            }, [isCartOpen, selectedId]);
+
+            /* ---------- Carrinho ---------- */
+            const addToCart = useCallback((id, qty = 1, opts = [], note = '') => {
+                const item = CATALOG[id];
+                if (!item) return;
+                const cleanOpts = [...new Set(opts)].filter((o) => ALLOWED_OPTS[o]).sort();
+                const cleanNote = String(note).replace(/\s+/g, ' ').trim().slice(0, MAX_NOTE_LEN);
+                const q = Math.max(1, Math.min(MAX_QTY_PER_ITEM, Math.floor(qty) || 1));
+                const key = `${id}::${cleanOpts.join(',')}::${cleanNote}`;
+
+                setCart((prev) => {
+                    const existing = prev.find((c) => c.key === key);
+                    if (existing) {
+                        return prev.map((c) => c.key === key ? { ...c, quantity: Math.min(c.quantity + q, MAX_QTY_PER_ITEM) } : c);
+                    }
+                    return [...prev, { key, id, quantity: q, opts: cleanOpts, note: cleanNote }];
+                });
+
+                playSound(SOUND_ADD_TO_CART);
+                setJustAdded(id);
+                clearTimeout(addedTimer.current);
+                addedTimer.current = setTimeout(() => setJustAdded(null), 1000);
+                setToast(item.name);
+                clearTimeout(toastTimer.current);
+                toastTimer.current = setTimeout(() => setToast(null), 1800);
+            }, []);
+
+            const updateQuantity = useCallback((key, delta) => {
+                setCart((prev) => prev
+                    .map((c) => c.key !== key ? c : { ...c, quantity: Math.max(0, Math.min(Math.floor(c.quantity + delta), MAX_QTY_PER_ITEM)) })
+                    .filter((c) => c.quantity > 0 && CATALOG[c.id]));
+            }, []);
+            const removeFromCart = useCallback((key) => setCart((prev) => prev.filter((c) => c.key !== key)), []);
+            const clearCart = useCallback(() => setCart([]), []);
+
+            // Nome e preço SEMPRE do catálogo oficial.
+            const cartDetailed = useMemo(() => (
+                cart
+                    .filter((c) => CATALOG[c.id])
+                    .map((c) => ({
+                        ...CATALOG[c.id],
+                        key: c.key,
+                        quantity: Math.min(Math.max(0, Math.floor(c.quantity)), MAX_QTY_PER_ITEM),
+                        opts: (c.opts || []).filter((o) => ALLOWED_OPTS[o]),
+                        note: String(c.note || '').slice(0, MAX_NOTE_LEN),
+                    }))
+                    .filter((c) => c.quantity > 0)
+            ), [cart]);
+            const cartTotalItems = useMemo(() => cartDetailed.reduce((s, c) => s + c.quantity, 0), [cartDetailed]);
+            const cartTotalPrice = useMemo(() => cartDetailed.reduce((s, c) => s + c.quantity * c.price, 0), [cartDetailed]);
+
+            const finalizeOrder = useCallback(() => {
+                if (cartDetailed.length === 0) return;
+                const itemsText = cartDetailed.map((c) => {
+                    let line = `*${c.name}*\n\`${c.quantity}x R$: ${formatPrice(c.price * c.quantity)}\``;
+                    if (c.opts.length) line += `\n_${c.opts.map((o) => ALLOWED_OPTS[o]).join(', ')}_`;
+                    if (c.note) line += `\n_Obs: ${c.note}_`;
+                    return line;
+                }).join('\n\n');
+
+                const message =
+                    `Olá, Bom Paladar! Gostaria de fazer o seguinte pedido:\n\n` +
+                    `${itemsText}\n\n` +
+                    `➖➖➖➖➖➖➖➖➖➖\n` +
+                    `*Total: R$ ${formatPrice(cartTotalPrice)}*\n\n` +
+                    `Podemos continuar com o pedido?`;
+
+                playSound(SOUND_ORDER_SENT);
+                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
+                setIsCartOpen(false);
+                // O carrinho não é apagado de propósito (evita perder o pedido num clique duplo).
+            }, [cartDetailed, cartTotalPrice]);
+
+            /* ---------- Favoritos / navegação ---------- */
+            const toggleFav = useCallback((id) => {
+                setFavs((prev) => prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]);
+            }, []);
+            const openItem = useCallback((id) => setSelectedId(id), []);
+            const scrollToId = useCallback((id) => {
+                const el = document.getElementById(id);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, []);
+            const scrollToTop = useCallback(() => window.scrollTo({ top: 0, behavior: 'smooth' }), []);
+
+            const onQueryChange = (value) => {
+                if (query === '' && value !== '') scrollToId('cardapio');
+                setQuery(value);
+            };
+
+            /* ---------- Listas filtradas ---------- */
+            const filteredPizzas = useMemo(() => {
+                const q = norm(query.trim());
+                let list = pizzas.filter((p) =>
+                    (category === 'todas' || p.category === category) &&
+                    (!favOnly || favs.includes(p.id)) &&
+                    (!q || norm(p.name).includes(q) || norm(p.ingredients).includes(q))
+                );
+                if (sortAZ) list = [...list].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+                return list;
+            }, [query, category, favOnly, favs, sortAZ]);
+
+            const filteredDrinks = useMemo(() => {
+                const q = norm(query.trim());
+                return bebidas.filter((b) => !q || norm(b.name).includes(q));
+            }, [query]);
+            const showDrinks = !favOnly && filteredDrinks.length > 0;
+
+            const selectedItem = selectedId ? CATALOG[selectedId] : null;
+            const highlights = useMemo(() => HIGHLIGHT_IDS.map((id) => CATALOG[id]), []);
+
+            /* ============ RENDER ============ */
+            return (
+                <div className="min-h-[100dvh] flex flex-col relative">
+
+                    {/* TOAST */}
+                    {toast && (
+                        <div className="toast-anim fixed top-20 left-1/2 z-[90] glass-strong rounded-full pl-3 pr-5 py-2.5 flex items-center gap-2 text-sm font-bold" style={{ transform: 'translateX(-50%)' }} role="status">
+                            <span className="h-6 w-6 rounded-full bg-green-600 text-white flex items-center justify-center"><Icon name="check" className="h-3.5 w-3.5" sw={3.5} /></span>
+                            <span className="truncate max-w-[220px]">{toast} adicionado</span>
+                        </div>
+                    )}
+
+                    {/* HEADER */}
+                    <header className="sticky top-0 z-50 glass" style={{ borderRadius: 0, borderLeft: 0, borderRight: 0, borderTop: 0, boxShadow: 'none' }}>
+                        <div className="max-w-7xl mx-auto px-5 h-[68px] flex items-center justify-between gap-4">
+                            <a href="#inicio" className="flex items-center gap-3" aria-label="Pizzaria Bom Paladar — início">
+                                <span className="btn-accent h-10 w-10 rounded-2xl flex items-center justify-center text-xl">🍕</span>
+                                <span className="leading-none">
+                                    <span className="block text-lg font-black tracking-tight uppercase">Bom Paladar</span>
+                                    <span className="block text-[10px] font-bold uppercase tracking-[.25em] text-muted mt-1">Pizzaria</span>
+                                </span>
+                            </a>
+                            <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-muted" aria-label="Principal">
+                                <a href="#inicio" className="hover:text-accent transition-colors">Início</a>
+                                <a href="#cardapio" className="hover:text-accent transition-colors">Cardápio</a>
+                                <a href="#bebidas" className="hover:text-accent transition-colors">Bebidas</a>
+                                <a href="#contato" className="hover:text-accent transition-colors">Contato</a>
+                            </nav>
+                            <div className="flex items-center gap-2.5">
+                                <button type="button" onClick={() => setIsLight((v) => !v)} className="icon-btn h-11 w-11 rounded-full flex items-center justify-center" aria-label={isLight ? 'Ativar tema escuro' : 'Ativar tema claro'}>
+                                    <Icon name={isLight ? 'moon' : 'sun'} />
+                                </button>
+                                <button type="button" onClick={() => setIsCartOpen(true)} className="relative btn-accent h-11 px-4 rounded-full flex items-center gap-2 font-extrabold text-sm" aria-label={`Abrir carrinho, ${cartTotalItems} itens`}>
+                                    <Icon name="cart" />
+                                    <span className="hidden sm:inline">Carrinho</span>
+                                    {cartTotalItems > 0 && (
+                                        <span className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] px-1 rounded-full bg-white text-[11px] font-black flex items-center justify-center" style={{ color: '#e50914', boxShadow: '0 2px 8px rgba(0,0,0,.35)' }}>{cartTotalItems}</span>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="flex-grow">
+
+                        {/* HERO */}
+                        <section id="inicio" className="max-w-7xl w-full mx-auto px-5 pt-7 md:pt-16 pb-6 grid md:grid-cols-2 gap-10 items-center">
+                            <div>
+                                <p className="text-muted font-semibold">{greeting}! 👋</p>
+                                <h1 className="mt-2 text-[44px] leading-[1.05] sm:text-6xl lg:text-7xl font-black tracking-tight">
+                                    Boa Pizza,<br />
+                                    <span className="text-accent-grad">Bom Paladar!</span>
+                                </h1>
+                                <p className="text-muted mt-4 max-w-md leading-relaxed">
+                                    Entrega rápida em Matriz de Camaragibe. Ingredientes selecionados, massa artesanal e o sabor que você já conhece.
+                                </p>
+
+                                {/* Busca + filtros */}
+                                <div className="relative mt-7 max-w-xl">
+                                    <div className="glass rounded-2xl flex items-center gap-3 pl-4 pr-2.5 h-14">
+                                        <Icon name="search" className="h-5 w-5 text-muted flex-shrink-0" />
+                                        <input
+                                            type="search"
+                                            value={query}
+                                            onChange={(e) => onQueryChange(e.target.value)}
+                                            placeholder="Busque seu sabor favorito"
+                                            aria-label="Buscar sabor"
+                                            className="flex-1 min-w-0 bg-transparent outline-none text-[15px]"
+                                            style={{ color: 'var(--text)' }}
+                                        />
+                                        {query && (
+                                            <button type="button" onClick={() => setQuery('')} aria-label="Limpar busca" className="h-8 w-8 rounded-full icon-btn flex items-center justify-center">
+                                                <Icon name="x" className="h-4 w-4" sw={2.5} />
+                                            </button>
+                                        )}
+                                        <button type="button" onClick={() => setShowFilter((v) => !v)} aria-label="Filtros" aria-expanded={showFilter} className={`h-10 w-10 rounded-xl flex items-center justify-center ${(sortAZ || favOnly) ? 'btn-accent' : 'icon-btn'}`}>
+                                            <Icon name="sliders" />
+                                        </button>
+                                    </div>
+                                    {showFilter && (
+                                        <>
+                                            <div className="fixed inset-0 z-20" onClick={() => setShowFilter(false)} />
+                                            <div className="pop-anim absolute right-0 top-[64px] z-30 w-64 glass-strong rounded-2xl p-4 space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-bold">Ordem A–Z</span>
+                                                    <Switch checked={sortAZ} onChange={() => setSortAZ((v) => !v)} label="Ordenar de A a Z" />
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-bold">Só favoritos</span>
+                                                    <Switch checked={favOnly} onChange={() => setFavOnly((v) => !v)} label="Mostrar somente favoritos" />
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="hidden md:flex justify-center relative">
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[110%] rounded-full pointer-events-none" style={{ background: 'rgba(255,122,0,.22)', filter: 'blur(90px)' }} />
+                                <div className="floaty relative z-10 w-full max-w-[420px]">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?q=80&w=700&auto=format&fit=crop"
+                                        alt="Pizza artesanal"
+                                        className="w-full aspect-square rounded-full object-cover animate-[spin_120s_linear_infinite]"
+                                        style={{ border: '8px solid var(--glass-b)', boxShadow: '0 30px 70px -20px rgba(255,100,0,.55)' }}
+                                    />
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* BANNER DESTAQUE */}
+                        <section className="max-w-7xl w-full mx-auto px-5 py-4" aria-label="Destaque da casa">
+                            <div className="glass rounded-[2rem] relative overflow-hidden p-6 md:p-8 flex items-center justify-between gap-4 min-h-[190px]">
+                                <div className="absolute -right-10 -top-10 w-64 h-64 rounded-full pointer-events-none" style={{ background: 'rgba(255,122,0,.28)', filter: 'blur(70px)' }} />
+                                <div className="relative z-10 max-w-[58%] md:max-w-md">
+                                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-muted">
+                                        <span className="text-accent"><Icon name="bolt" className="h-4 w-4" fill="currentColor" sw={1} /></span>
+                                        Destaque da Casa
+                                    </span>
+                                    <h2 className="mt-2 text-2xl md:text-4xl font-black leading-tight">
+                                        Sabor<br /><span className="text-accent-grad">da Casa</span>
+                                    </h2>
+                                    <p className="text-muted text-xs md:text-sm mt-2 hidden sm:block">Frango, mussarela, catupiry e cebola. O queridinho de quem nos conhece.</p>
+                                    <button type="button" onClick={() => openItem(11)} className="btn-accent mt-4 h-11 px-6 rounded-full font-extrabold text-sm inline-flex items-center gap-2">
+                                        Pedir agora <Icon name="arrow" className="h-4 w-4" sw={2.5} />
+                                    </button>
+                                </div>
+                                <div className="relative z-10 flex-shrink-0">
+                                    <div className="w-36 h-36 md:w-52 md:h-52 rounded-full overflow-hidden img-ph" style={{ border: '5px solid var(--glass-b)', boxShadow: '0 20px 40px -10px rgba(255,100,0,.5)' }}>
+                                        <SafeImg src={CATALOG[11].image.replace('w=400', 'w=500')} alt="Pizza Sabor da Casa" className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="btn-accent absolute -left-3 bottom-1 md:left-0 h-14 w-14 md:h-16 md:w-16 rounded-full flex flex-col items-center justify-center leading-none" style={{ border: '3px solid var(--bg)' }}>
+                                        <span className="text-[9px] font-bold opacity-90">R$</span>
+                                        <span className="text-base md:text-lg font-black">{formatPrice(CATALOG[11].price).replace(',00', '')}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* DESTAQUES (carrossel) */}
+                        <section className="max-w-7xl w-full mx-auto px-5 pt-8" aria-label="Destaques">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl font-black">Destaques da Casa</h2>
+                                <a href="#cardapio" className="text-sm font-bold text-muted hover:text-accent transition-colors">Ver todos</a>
+                            </div>
+                            <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 pb-4">
+                                {highlights.map((item) => (
+                                    <ItemCard key={item.id} compact item={item} isFav={favs.includes(item.id)} isJustAdded={justAdded === item.id} onOpen={openItem} onAdd={addToCart} onFav={toggleFav} />
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* COMO PEDIR */}
+                        <section className="max-w-7xl w-full mx-auto px-5 pt-6" aria-label="Como pedir">
+                            <div className="glass rounded-[2rem] p-5 md:p-7">
+                                <h2 className="text-sm font-black uppercase tracking-[.2em] text-muted mb-4">Como fazer seu pedido</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {[
+                                        ['Escolha', 'Toque no ', 'botão +', ' da pizza ou bebida.'],
+                                        ['Confira', 'Abra o ', 'Carrinho', ' e revise seu pedido.'],
+                                        ['Envie', 'Toque em ', 'Fazer o Pedido', ' e finalize pelo WhatsApp.'],
+                                    ].map((s, i) => (
+                                        <div key={s[0]} className="flex items-center gap-4">
+                                            <span className="btn-accent flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center font-black text-lg">{i + 1}</span>
+                                            <p className="text-sm font-semibold leading-snug">
+                                                <span className="block font-black">{s[0]}</span>
+                                                <span className="text-muted">{s[1]}<span className="text-accent font-bold">{s[2]}</span>{s[3]}</span>
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* CARDÁPIO */}
+                        <section id="cardapio" className="max-w-7xl w-full mx-auto px-5 pt-12" aria-label="Cardápio de pizzas">
+                            <div className="flex items-end justify-between gap-4 mb-5">
+                                <div>
+                                    <h2 className="text-2xl md:text-3xl font-black">Cardápio</h2>
+                                    <p className="text-muted text-sm mt-1">
+                                        {filteredPizzas.length} {filteredPizzas.length === 1 ? 'sabor' : 'sabores'}
+                                        {favOnly ? ' favoritos' : ''}
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setFavOnly((v) => !v)}
+                                    aria-pressed={favOnly}
+                                    className={`h-10 px-4 rounded-full text-sm font-bold flex items-center gap-2 ${favOnly ? 'btn-accent' : 'icon-btn'}`}
+                                >
+                                    <Icon name="heart" className="h-4 w-4" fill={favOnly ? 'currentColor' : 'none'} />
+                                    Favoritos
+                                </button>
+                            </div>
+
+                            {/* Categorias */}
+                            <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 pb-5" role="tablist" aria-label="Categorias">
+                                {CATEGORIES.map((c) => (
+                                    <button key={c.id} type="button" role="tab" aria-selected={category === c.id} onClick={() => setCategory(c.id)} className={`cat-tile ${category === c.id ? 'active' : ''}`}>
+                                        <span className="emo">{c.emoji}</span>
+                                        {c.label}
+                                    </button>
+                                ))}
+                                <button type="button" onClick={() => scrollToId('bebidas')} className="cat-tile">
+                                    <span className="emo">🥤</span>
+                                    Bebidas
+                                </button>
+                            </div>
+
+                            {filteredPizzas.length > 0 ? (
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                                    {filteredPizzas.map((pizza) => (
+                                        <ItemCard key={pizza.id} item={pizza} isFav={favs.includes(pizza.id)} isJustAdded={justAdded === pizza.id} onOpen={openItem} onAdd={addToCart} onFav={toggleFav} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="glass rounded-3xl p-10 text-center">
+                                    <div className="text-5xl mb-3">🔍</div>
+                                    <p className="font-extrabold">Nenhum sabor encontrado</p>
+                                    <p className="text-muted text-sm mt-1">Tente outra busca ou limpe os filtros.</p>
+                                    <button type="button" onClick={() => { setQuery(''); setCategory('todas'); setFavOnly(false); }} className="btn-accent mt-5 h-11 px-6 rounded-full font-extrabold text-sm">Limpar filtros</button>
+                                </div>
+                            )}
+                        </section>
+
+                        {/* BEBIDAS */}
+                        {showDrinks && (
+                            <section id="bebidas" className="max-w-7xl w-full mx-auto px-5 pt-14" aria-label="Bebidas">
+                                <div className="flex items-center gap-3 mb-5">
+                                    <span className="w-1.5 h-8 rounded-full btn-accent" />
+                                    <h2 className="text-2xl md:text-3xl font-black">Bebidas</h2>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {filteredDrinks.map((b) => (
+                                        <DrinkCard key={b.id} item={b} isJustAdded={justAdded === b.id} onAdd={addToCart} />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                    </main>
+
+                    {/* FOOTER */}
+                    <footer id="contato" className="mt-20 pt-14 pb-32 md:pb-8" style={{ borderTop: '1px solid var(--glass-b)' }}>
+                        <div className="max-w-7xl mx-auto px-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 text-sm">
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <span className="btn-accent h-10 w-10 rounded-2xl flex items-center justify-center text-xl">🍕</span>
+                                    <h3 className="text-2xl font-black uppercase tracking-tight">Bom Paladar</h3>
+                                </div>
+                                <p className="text-muted max-w-xs leading-relaxed text-base">
+                                    A união perfeita entre a tradição de uma boa massa e a facilidade do pedido online direto para a sua mesa.
+                                </p>
+                            </div>
+                            <div className="space-y-4">
+                                <h4 className="font-black uppercase tracking-[.2em] text-xs text-muted">Informações</h4>
+                                <ul className="space-y-3 text-base">
+                                    <li className="flex items-center gap-3"><span className="text-accent"><Icon name="pin" /></span> Matriz de Camaragibe - AL</li>
+                                    <li className="flex items-center gap-3"><span className="text-accent"><Icon name="bolt" /></span> Atendimento Rápido 24/7</li>
+                                </ul>
+                            </div>
+                            <div className="space-y-4">
+                                <h4 className="font-black uppercase tracking-[.2em] text-xs text-muted">Contatos rápidos</h4>
+                                <ul className="space-y-3">
+                                    <li>
+                                        <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="glass inline-flex items-center gap-3 rounded-full pl-4 pr-5 h-12 font-bold hover:text-green-500 transition-colors">
+                                            <WhatsAppGlyph size={20} /> (82) 99403-3796
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href={INSTAGRAM_LINK} target="_blank" rel="noopener noreferrer" className="glass inline-flex items-center gap-3 rounded-full pl-4 pr-5 h-12 font-bold hover:text-pink-500 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                                            @pizzaria.bom.paladar.j.m
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div className="max-w-7xl mx-auto px-5 mt-12 pt-6 text-xs text-muted font-medium" style={{ borderTop: '1px solid var(--glass-b)' }}>
+                            &copy; {new Date().getFullYear()} Pizzaria Bom Paladar. Todos os direitos reservados.
+                        </div>
+                    </footer>
+
+                    {/* BOTÃO FLUTUANTE: VER CARRINHO */}
+                    {cartTotalItems > 0 && !isCartOpen && !selectedItem && (
+                        <button
+                            type="button"
+                            onClick={() => setIsCartOpen(true)}
+                            className={`fixed left-1/2 -translate-x-1/2 bottom-[100px] md:bottom-6 z-40 btn-accent h-14 pl-4 pr-6 rounded-full flex items-center gap-3 whitespace-nowrap ${justAdded ? 'cart-wiggle' : ''}`}
+                        >
+                            <span className="relative">
+                                <Icon name="cart" />
+                                <span className="absolute -top-2 -right-2 bg-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black" style={{ color: '#e50914' }}>{cartTotalItems}</span>
+                            </span>
+                            <span className="font-extrabold text-sm">Ver Carrinho · R$ {formatPrice(cartTotalPrice)}</span>
+                        </button>
+                    )}
+
+                    {/* VOLTAR AO TOPO */}
+                    <button
+                        type="button"
+                        onClick={scrollToTop}
+                        aria-label="Voltar ao topo"
+                        className={`fixed right-4 md:right-6 bottom-[100px] md:bottom-6 z-40 h-12 w-12 rounded-full btn-accent flex items-center justify-center transition-all duration-300 ${showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
+                    >
+                        <Icon name="up" className="h-5 w-5" sw={3} />
+                    </button>
+
+                    {/* MENU INFERIOR (mobile) */}
+                    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 px-4" style={{ paddingBottom: 'max(.75rem, env(safe-area-inset-bottom))' }} aria-label="Navegação inferior">
+                        <div className="glass-strong rounded-[1.7rem] grid grid-cols-4 p-1.5" style={{ boxShadow: '0 10px 40px -8px rgba(0,0,0,.6)' }}>
+                            {[
+                                { id: 'home', label: 'Início', icon: 'home', active: activeSection === 'inicio' && !favOnly, onClick: () => { setFavOnly(false); scrollToTop(); } },
+                                { id: 'menu', label: 'Cardápio', icon: 'menu', active: (activeSection === 'cardapio' || activeSection === 'bebidas') && !favOnly, onClick: () => { setFavOnly(false); scrollToId('cardapio'); } },
+                                { id: 'fav', label: 'Favoritos', icon: 'heart', active: favOnly, onClick: () => { setFavOnly((v) => !v); scrollToId('cardapio'); } },
+                                { id: 'cart', label: 'Carrinho', icon: 'cart', active: isCartOpen, onClick: () => setIsCartOpen(true), badge: cartTotalItems },
+                            ].map((n) => (
+                                <button key={n.id} type="button" onClick={n.onClick} aria-current={n.active ? 'page' : undefined} className={`relative flex flex-col items-center gap-1 py-2 rounded-2xl text-[11px] font-bold ${n.active ? 'text-accent' : 'text-muted'}`}>
+                                    <Icon name={n.icon} className="h-6 w-6" fill={n.id === 'fav' && favOnly ? 'currentColor' : 'none'} />
+                                    {n.label}
+                                    {n.badge > 0 && <span className="absolute top-1 right-[22%] min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-black flex items-center justify-center">{n.badge}</span>}
+                                </button>
+                            ))}
+                        </div>
+                    </nav>
+
+                    {/* DETALHES DO ITEM */}
+                    {selectedItem && (
+                        <DetailSheet key={selectedItem.id} item={selectedItem} isFav={favs.includes(selectedItem.id)} onFav={toggleFav} onAdd={addToCart} onClose={() => setSelectedId(null)} />
+                    )}
+
+                    {/* CARRINHO */}
+                    {isCartOpen && (
+                        <div className="fixed inset-0 z-[80] fade-anim" role="dialog" aria-modal="true" aria-label="Carrinho">
+                            <div className="absolute inset-0 bg-black/65" style={{ backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} onClick={() => setIsCartOpen(false)} />
+                            <div className="drawer-anim glass-strong absolute inset-x-0 bottom-0 max-h-[90dvh] rounded-t-[2rem] flex flex-col md:inset-y-0 md:right-0 md:left-auto md:w-[430px] md:max-h-none md:rounded-t-none md:rounded-l-[2rem]">
+                                <div className="flex items-center justify-between p-6" style={{ borderBottom: '1px solid var(--glass-b)' }}>
+                                    <h2 className="text-xl font-black uppercase tracking-wider">Seu Carrinho</h2>
+                                    <div className="flex items-center gap-2">
+                                        {cartDetailed.length > 0 && (
+                                            <button type="button" onClick={clearCart} className="icon-btn h-10 w-10 rounded-full flex items-center justify-center hover:text-red-500" aria-label="Esvaziar carrinho" title="Esvaziar carrinho">
+                                                <Icon name="trash" />
+                                            </button>
+                                        )}
+                                        <button type="button" onClick={() => setIsCartOpen(false)} className="icon-btn h-10 w-10 rounded-full flex items-center justify-center" aria-label="Fechar carrinho">
+                                            <Icon name="x" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-3 min-h-[180px]">
+                                    {cartDetailed.length === 0 ? (
+                                        <div className="h-full min-h-[200px] flex flex-col items-center justify-center text-center text-muted gap-3">
+                                            <div className="text-5xl">🛒</div>
+                                            <p className="font-extrabold" style={{ color: 'var(--text)' }}>Seu carrinho está vazio</p>
+                                            <p className="text-sm">Adicione pizzas ou bebidas para começar seu pedido.</p>
+                                            <button type="button" onClick={() => { setIsCartOpen(false); scrollToId('cardapio'); }} className="btn-accent mt-2 h-11 px-6 rounded-full font-extrabold text-sm">Ver cardápio</button>
+                                        </div>
+                                    ) : cartDetailed.map((item) => (
+                                        <div key={item.key} className="glass rounded-2xl p-3 flex items-center gap-3">
+                                            <div className="img-ph w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                                                <SafeImg src={item.image} alt={item.name} emoji={item.category === 'bebida' ? '🥤' : '🍕'} className="w-full h-full object-cover" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-extrabold text-sm truncate">{item.name}</h3>
+                                                {item.opts.length > 0 && <p className="text-[11px] text-muted truncate">{item.opts.map((o) => ALLOWED_OPTS[o]).join(' · ')}</p>}
+                                                {item.note && <p className="text-[11px] text-muted truncate">Obs: {item.note}</p>}
+                                                <p className="text-accent font-black text-sm mt-0.5">R$ {formatPrice(item.price * item.quantity)}</p>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                                                <button type="button" onClick={() => removeFromCart(item.key)} aria-label={`Remover ${item.name}`} className="text-muted hover:text-red-500 transition-colors">
+                                                    <Icon name="x" className="h-4 w-4" sw={2.5} />
+                                                </button>
+                                                <div className="flex items-center gap-1.5">
+                                                    <button type="button" onClick={() => updateQuantity(item.key, -1)} aria-label="Diminuir quantidade" className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'var(--glass-b)' }}>
+                                                        <Icon name="minus" className="h-3.5 w-3.5" sw={3} />
+                                                    </button>
+                                                    <span className="w-5 text-center font-black text-sm tabular-nums">{item.quantity}</span>
+                                                    <button type="button" onClick={() => updateQuantity(item.key, 1)} aria-label="Aumentar quantidade" className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'var(--glass-b)' }}>
+                                                        <Icon name="plus" className="h-3.5 w-3.5" sw={3} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {cartDetailed.length > 0 && (
+                                    <div className="p-5 space-y-4" style={{ borderTop: '1px solid var(--glass-b)', paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-muted font-semibold">Total ({cartTotalItems} {cartTotalItems === 1 ? 'item' : 'itens'})</span>
+                                            <span className="text-2xl font-black">R$ {formatPrice(cartTotalPrice)}</span>
+                                        </div>
+                                        <button type="button" onClick={finalizeOrder} className="btn-wa w-full h-14 rounded-full font-extrabold text-sm tracking-widest uppercase flex items-center justify-center gap-2.5">
+                                            <WhatsAppGlyph size={20} /> Fazer o Pedido
+                                        </button>
+                                        <p className="text-center text-[11px] text-muted">O pedido é enviado pelo WhatsApp para confirmação.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
